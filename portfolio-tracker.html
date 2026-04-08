@@ -485,7 +485,7 @@
   if (!h) return;
 
   try {
-    const res = await fetch(`/price/${h.sym}.${h.exch}`);
+    const res = await fetch(`/.netlify/functions/price/${h.sym}.${h.exch}`);
     const data = await res.json();
 
     const meta = data?.chart?.result?.[0]?.meta;
