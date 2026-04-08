@@ -486,8 +486,8 @@
 
   try {
     const res = await fetch(`/.netlify/functions/price/${h.sym}.${h.exch}`);
-    const data = await res.json();
-
+    const raw = await res.json();
+    const data = raw.body ? JSON.parse(raw.body) : raw;
     const meta = data?.chart?.result?.[0]?.meta;
 
     if (meta && meta.regularMarketPrice) {
