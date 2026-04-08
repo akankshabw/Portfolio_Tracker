@@ -5,7 +5,8 @@ exports.handler = async function (event) {
     const res = await fetch(
       `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`
     );
-    const data = await res.json();
+    const raw = await res.json();
+    const data = raw.body ? JSON.parse(raw.body) : raw;
 
     return {
       statusCode: 200,
