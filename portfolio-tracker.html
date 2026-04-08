@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f5f3ef;
+      --surface:   #ffffff;
+      --surface2:  #f0ede8;
+      --border:    #e2ddd6;
+      --border2:   #ccc8c0;
+      --text:      #1c1917;
+      --text2:     #6b6560;
+      --text3:     #a09890;
+      --green:     #2d6a4f;
+      --green-bg:  #eaf4ef;
+      --red:       #b5321b;
+      --red-bg:    #fdf0ed;
+      --mono:      'JetBrains Mono', monospace;
+      --serif:     'Literata', Georgia, serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--serif);
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    #inp-exch {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 8px 11px;
+      font-size: 13px;
+      font-family: var(--mono);
+      height: 36px;
+
+      appearance: none;
+    }
+
+    /* 👇 placeholder style */
+    #inp-exch.placeholder {
+      color: var(--text3);
+    }
+
+    /* 👇 selected value style */
+    #inp-exch.selected {
+      color: var(--text);
+    }
+    .logo {
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .logo em { font-style: italic; font-weight: 400; color: var(--text2); }
+
+    .header-right { display: flex; align-items: center; gap: 14px; }
+
+    .status-pill {
+      display: flex; align-items: center; gap: 7px;
+      font-family: var(--mono); font-size: 11px; color: var(--text3);
+    }
+
+    .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--border2); flex-shrink: 0; transition: background 0.3s;
+    }
+    .dot.live { background: var(--green); }
+
+    .refresh-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: none; border: 1px solid var(--border2);
+      color: var(--text2); padding: 6px 14px; border-radius: 6px;
+      font-family: var(--mono); font-size: 11px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .refresh-btn:hover { border-color: var(--text); color: var(--text); background: var(--surface2); }
+    .refresh-btn.spinning svg { animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* MAIN */
+    main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem; }
+
+    /* API BANNER */
+    .api-banner {
+      background: #fffbf0; border: 1px solid #e0cc80;
+      border-radius: 10px; padding: 1.1rem 1.25rem;
+      margin-bottom: 2rem; display: flex; gap: 12px; align-items: flex-start;
+    }
+    .api-banner.hidden { display: none; }
+    .api-banner-body { flex: 1; }
+    .api-banner p { font-family: var(--mono); font-size: 12px; color: #5a4a10; line-height: 1.7; }
+    .api-banner a { color: #7a4f10; }
+    .api-banner strong { color: #3a2f00; }
+    .api-input-row { display: flex; gap: 8px; margin-top: 10px; }
+    .api-input-row input {
+      flex: 1; font-family: var(--mono); font-size: 12px;
+      padding: 6px 10px; border: 1px solid #d4c070; border-radius: 5px;
+      background: #fffef5; color: var(--text);
+    }
+    .api-input-row input:focus { outline: none; border-color: #a08030; }
+    .api-save-btn {
+      padding: 6px 14px; background: var(--text); color: var(--surface);
+      border: none; border-radius: 5px; font-family: var(--mono);
+      font-size: 11px; cursor: pointer; white-space: nowrap;
+    }
+    .api-save-btn:hover { opacity: 0.8; }
+
+    /* METRICS */
+    .metrics {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1px; background: var(--border); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; margin-bottom: 2.5rem;
+    }
+    .metric { background: var(--surface); padding: 1.4rem 1.5rem; }
+    .metric-label {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.09em;
+      text-transform: uppercase; color: var(--text3); margin-bottom: 10px;
+    }
+    .metric-value {
+      font-family: var(--mono); font-size: 1.5rem; font-weight: 500;
+      color: var(--text); line-height: 1; letter-spacing: -0.02em;
+    }
+    .metric-sub { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 7px; }
+    .metric-value.pos { color: var(--green); }
+    .metric-value.neg { color: var(--red); }
+
+    /* ADD FORM */
+    .add-section {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.4rem 1.5rem; margin-bottom: 2.5rem;
+    }
+    .section-label {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text3); margin-bottom: 1rem;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1.8fr 1.1fr 0.7fr 1.1fr 1.2fr;
+      gap: 10px; align-items: end;
+    }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.04em; }
+    .field input {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 7px; padding: 8px 11px; font-size: 13px;
+      font-family: var(--mono); color: var(--text); height: 36px;
+      transition: border-color 0.15s; width: 100%;
+    }
+    .field input::placeholder { color: var(--text3); } */
+    .field input:focus { outline: none; border-color: var(--border2); background: var(--surface); }
+
+    .add-btn {
+      margin-top: 12px; height: 36px; padding: 0 20px;
+      background: var(--text); color: var(--surface); border: none;
+      border-radius: 7px; font-family: var(--mono); font-size: 12px;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .add-btn:hover { opacity: 0.8; }
+
+    .hint {
+      font-family: var(--mono); font-size: 10px; color: var(--text3);
+      margin-top: 10px; line-height: 1.8;
+    }
+    .hint strong { color: var(--text2); }
+
+    /* TABLE */
+    .table-wrap {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; overflow-x: auto;
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 820px; }
+    thead th {
+      text-align: left; font-family: var(--mono); font-size: 10px;
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3);
+      padding: 11px 16px; border-bottom: 1px solid var(--border); font-weight: 400;
+      white-space: nowrap; background: var(--surface);
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--bg); }
+    tbody td {
+      padding: 12px 16px; font-size: 13px; font-family: var(--mono);
+      color: var(--text); white-space: nowrap;
+    }
+    td.sym-cell {
+      font-family: var(--serif); font-size: 14px;
+      font-weight: 500; letter-spacing: -0.01em;
+    }
+    .exch-tag { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+    .acct-tag {
+      font-family: var(--mono); font-size: 10px; padding: 2px 8px;
+      border-radius: 4px; background: var(--surface2); color: var(--text2);
+      border: 1px solid var(--border);
+    }
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 11px; font-family: var(--mono); font-weight: 500;
+    }
+    .badge.pos { background: var(--green-bg); color: var(--green); }
+    .badge.neg { background: var(--red-bg); color: var(--red); }
+
+    .dots { display: flex; gap: 3px; align-items: center; }
+    .dots span {
+      width: 4px; height: 4px; border-radius: 50%;
+      background: var(--text3); animation: pulse 1.2s ease-in-out infinite;
+    }
+    .dots span:nth-child(2) { animation-delay: 0.2s; }
+    .dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse { 0%,100%{opacity:0.2} 50%{opacity:1} }
+
+    .err-txt { font-size: 10px; color: var(--red); font-family: var(--mono); }
+    .del-btn {
+      background: none; border: none; color: var(--text3); cursor: pointer;
+      padding: 3px 7px; border-radius: 4px; font-size: 12px;
+      font-family: var(--mono); transition: color 0.15s;
+    }
+    .del-btn:hover { color: var(--red); }
+
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text3); }
+    .empty-state p { font-family: var(--mono); font-size: 12px; margin-top: 8px; }
+    .empty-glyph { font-family: var(--serif); font-size: 2rem; opacity: 0.2; font-style: italic; }
+
+    /* FOOTER */
+    footer {
+      max-width: 1100px; margin: 2rem auto 0;
+      padding: 1.25rem 2rem; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between;
+    }
+    footer p { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      background: var(--text); color: var(--surface); border-radius: 7px;
+      padding: 9px 15px; font-family: var(--mono); font-size: 12px;
+      opacity: 0; transform: translateY(8px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none; z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* RESPONSIVE */
+    @media (max-width: 860px) {
+      .metrics { grid-template-columns: 1fr 1fr; }
+      .form-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 520px) {
+      header { padding: 0.9rem 1rem; }
+      main { padding: 1.25rem 1rem; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Portfolio <em>tracker</em></div>
+  <div class="header-right">
+    <div class="status-pill">
+      <div class="dot" id="dot"></div>
+      <span id="status-text">—</span>
+    </div>
+    <button class="refresh-btn" id="refresh-btn" onclick="refreshAll()">
+      <svg id="ref-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0018.49 15"/>
+      </svg>
+      Refresh prices
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <!-- METRICS -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Total invested</div>
+      <div class="metric-value" id="m-invested">—</div>
+      <div class="metric-sub" id="m-count">0 holdings</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Current value</div>
+      <div class="metric-value" id="m-current">—</div>
+      <div class="metric-sub" id="m-when">not fetched yet</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total P&amp;L</div>
+      <div class="metric-value" id="m-pnl">—</div>
+      <div class="metric-sub">&nbsp;</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Overall return</div>
+      <div class="metric-value" id="m-ret">—</div>
+      <div class="metric-sub">&nbsp;</div>
+    </div>
+  </div>
+
+  <!-- ADD FORM -->
+  <div class="add-section">
+    <div class="section-label">Add holding</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Symbol</label>
+        <input id="inp-sym" placeholder="RELIANCE / INFY / AAPL" autocomplete="on" spellcheck="false" />
+      </div>
+      <select id="inp-exch" class="placeholder">
+        <option value="" disabled selected>Select exchange</option>
+        <option value="NSE">NSE</option>
+        <option value="BSE">BSE</option>
+      </select>
+      <div class="field">
+        <label>Qty</label>
+        <input id="inp-qty" type="number" step="any" placeholder="10" />
+      </div>
+      <div class="field">
+        <label>Buy price (₹ / $)</label>
+        <input id="inp-price" type="number" step="0.01" placeholder="1200.00" />
+      </div>
+      <div class="field">
+        <label>Account label</label>
+        <input id="inp-acct" placeholder="Grow / Friend's / Zerodha" />
+      </div>
+    </div>
+    <button class="add-btn" onclick="addHolding()">+ Add holding</button>
+    <p class="hint">
+      <strong>Indian stocks:</strong> Symbol = RELIANCE, Exchange = BSE &nbsp;·&nbsp;
+      <strong>US stocks:</strong> Symbol = AAPL, leave exchange blank &nbsp;·&nbsp;
+      <strong>ETF/Index:</strong> Symbol = NIFTYBEES, Exchange = NSE
+    </p>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Account</th>
+          <th>Qty</th>
+          <th>Buy price</th>
+          <th>Current price</th>
+          <th>Invested</th>
+          <th>Current value</th>
+          <th>P&amp;L</th>
+          <th>Return %</th>
+          <th>Day chg</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="holdings-body">
+        <tr>
+          <td colspan="11" class="empty-state">
+            <div class="empty-glyph">∅</div>
+            <p>No holdings yet — add your first stock above</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<footer>
+  <p>Prices via Yahoo Finance</p>
+  <p>All data stored locally in your browser — nothing is sent anywhere</p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* STATE */
+  let holdings = JSON.parse(localStorage.getItem('pf_td_v1') || '[]');
+  let API_KEY   = localStorage.getItem('td_api_key') || '';
+
+  function save() { localStorage.setItem('pf_td_v1', JSON.stringify(holdings)); }
+
+  /* API KEY */
+  function saveApiKey() {
+    const k = document.getElementById('api-key-input').value.trim();
+    if (!k) { showToast('Please paste your API key'); return; }
+    API_KEY = k;
+    localStorage.setItem('td_api_key', k);
+    document.getElementById('api-banner').classList.add('hidden');
+    showToast('API key saved ✓');
+    if (holdings.length > 0) refreshAll();
+  }
+
+  function initBanner() {
+    if (API_KEY) document.getElementById('api-banner').classList.add('hidden');
+  }
+
+  /* TOAST */
+  function showToast(msg, ms = 2600) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), ms);
+  }
+
+  /* FORMAT */
+  function money(n, cur) {
+    if (n === null || n === undefined || isNaN(n)) return '—';
+    const s = cur === 'USD' ? '$' : '₹';
+    return s + Math.abs(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function moneySign(n, cur) {
+    if (n === null || isNaN(n)) return '—';
+    const s = cur === 'USD' ? '$' : '₹';
+    return (n >= 0 ? '+' : '−') + s + Math.abs(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function INR(n) {
+    return '₹' + Math.abs(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  }
+
+  /* ADD HOLDING */
+  function addHolding() {
+    const sym   = document.getElementById('inp-sym').value.trim().toUpperCase();
+    const exch  = document.getElementById('inp-exch').value.trim().toUpperCase();
+    const qty   = parseFloat(document.getElementById('inp-qty').value);
+    const price = parseFloat(document.getElementById('inp-price').value);
+    const acct  = document.getElementById('inp-acct').value.trim() || 'Main';
+
+    if (!sym)                      { showToast('Enter a symbol'); return; }
+    if (isNaN(qty)   || qty <= 0)  { showToast('Enter a valid quantity'); return; }
+    if (isNaN(price) || price <= 0){ showToast('Enter a valid buy price'); return; }
+
+    let finalexch = exch;
+
+    if (exch === "NSE") finalexch = "NS";
+    else if (exch === "BSE") finalexch = "BO";
+
+    holdings.push({
+      id: Date.now(),
+      sym: sym,
+      exch: finalexch,
+      qty,
+      buyPrice: price,
+      acct,
+      currentPrice: null,
+      prevClose: null,
+      currency: null,
+      lastUpdated: null,
+      fetchError: false
+    });
+
+    save();
+    ['inp-sym','inp-exch','inp-qty','inp-price','inp-acct'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    renderTable(); renderMetrics();
+    fetchPrice(holdings.length - 1);
+  }
+
+  /* DELETE */
+  function removeHolding(id) {
+    holdings = holdings.filter(h => h.id !== id);
+    save(); renderTable(); renderMetrics();
+  }
+
+  async function fetchPrice(i) {
+  const h = holdings[i];
+  if (!h) return;
+
+  try {
+    const res = await fetch(`/price/${h.sym}.${h.exch}`);
+    const data = await res.json();
+
+    const meta = data?.chart?.result?.[0]?.meta;
+
+    if (meta && meta.regularMarketPrice) {
+      h.currentPrice = meta.regularMarketPrice;
+      h.prevClose = meta.previousClose || null;
+      h.currency = meta.currency === 'USD' ? 'USD' : 'INR';
+      h.lastUpdated = new Date().toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      h.fetchError = false;
+    } else {
+      h.fetchError = true;
+    }
+
+    save();
+    renderTable();
+    renderMetrics();
+
+  } catch (err) {
+    console.error("Backend fetch failed:", err);
+    h.fetchError = true;
+    save();
+    renderTable();
+  }
+}
+
+  /* REFRESH ALL */
+  async function refreshAll() {
+    if (!API_KEY)             { showToast('Please save your API key first'); return; }
+    if (holdings.length === 0){ showToast('No holdings to refresh'); return; }
+
+    const btn = document.getElementById('refresh-btn');
+    btn.classList.add('spinning');
+    setStatus('Fetching…', false);
+
+    for (let i = 0; i < holdings.length; i++) {
+      await fetchPrice(i);
+      // Space requests ~400ms apart to stay within 8 req/min free tier
+      if (i < holdings.length - 1) await sleep(420);
+    }
+
+    btn.classList.remove('spinning');
+    const t = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    setStatus('Updated ' + t, true);
+    document.getElementById('m-when').textContent = 'as of ' + t;
+    showToast('All prices refreshed');
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function setStatus(msg, live) {
+    document.getElementById('status-text').textContent = msg;
+    document.getElementById('dot').className = 'dot' + (live ? ' live' : '');
+  }
+
+  /* RENDER TABLE */
+  function renderTable() {
+    const body = document.getElementById('holdings-body');
+    if (holdings.length === 0) {
+      body.innerHTML = `<tr><td colspan="11" class="empty-state">
+        <div class="empty-glyph">∅</div>
+        <p>No holdings yet — add your first stock above</p>
+      </td></tr>`;
+      return;
+    }
+
+    body.innerHTML = holdings.map(h => {
+      const invested = h.buyPrice * h.qty;
+      const cur      = h.currentPrice;
+      const curVal   = cur !== null ? cur * h.qty : null;
+      const pnl      = curVal !== null ? curVal - invested : null;
+      const ret      = pnl !== null && invested > 0 ? (pnl / invested) * 100 : null;
+      const dayChg   = (h.prevClose && cur) ? ((cur - h.prevClose) / h.prevClose) * 100 : null;
+
+      const priceCell = h.fetchError
+        ? `<span class="err-txt">symbol not found</span>`
+        : cur !== null
+          ? money(cur, h.currency)
+          : `<div class="dots"><span></span><span></span><span></span></div>`;
+
+      const pnlCell = pnl !== null
+        ? `<span class="badge ${pnl >= 0 ? 'pos' : 'neg'}">${moneySign(pnl, h.currency)}</span>`
+        : '—';
+
+      const retCell = ret !== null
+        ? `<span class="badge ${ret >= 0 ? 'pos' : 'neg'}">${ret >= 0 ? '+' : ''}${ret.toFixed(2)}%</span>`
+        : '—';
+
+      const dayCell = dayChg !== null
+        ? `<span style="color:${dayChg >= 0 ? 'var(--green)' : 'var(--red)'};">${dayChg >= 0 ? '+' : ''}${dayChg.toFixed(2)}%</span>`
+        : '—';
+
+      const exchLabel = h.exch
+        ? ` <span class="exch-tag">· ${h.exch}</span>`
+        : '';
+
+      return `<tr>
+        <td class="sym-cell">${h.sym}${exchLabel}</td>
+        <td><span class="acct-tag">${h.acct}</span></td>
+        <td>${h.qty % 1 === 0 ? h.qty : h.qty.toFixed(3)}</td>
+        <td>${money(h.buyPrice, h.currency)}</td>
+        <td>${priceCell}</td>
+        <td>${money(invested, h.currency)}</td>
+        <td>${curVal !== null ? money(curVal, h.currency) : '—'}</td>
+        <td>${pnlCell}</td>
+        <td>${retCell}</td>
+        <td>${dayCell}</td>
+        <td><button class="del-btn" onclick="removeHolding(${h.id})">✕</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  /* RENDER METRICS */
+  function renderMetrics() {
+    let totalInv = 0, totalCur = 0, hasAny = false;
+    holdings.forEach(h => {
+      totalInv += h.buyPrice * h.qty;
+      if (h.currentPrice !== null) { totalCur += h.currentPrice * h.qty; hasAny = true; }
+    });
+
+    const pnl = hasAny ? totalCur - totalInv : null;
+    const ret = hasAny && totalInv > 0 ? (pnl / totalInv) * 100 : null;
+
+    document.getElementById('m-invested').textContent = totalInv > 0 ? INR(totalInv) : '—';
+    document.getElementById('m-count').textContent    = holdings.length + ' holding' + (holdings.length !== 1 ? 's' : '');
+    document.getElementById('m-current').textContent  = hasAny ? INR(totalCur) : '—';
+
+    const pnlEl = document.getElementById('m-pnl');
+    pnlEl.textContent = pnl !== null ? (pnl >= 0 ? '+' : '−') + INR(pnl) : '—';
+    pnlEl.className   = 'metric-value' + (pnl !== null ? (pnl >= 0 ? ' pos' : ' neg') : '');
+
+    const retEl = document.getElementById('m-ret');
+    retEl.textContent = ret !== null ? (ret >= 0 ? '+' : '') + ret.toFixed(2) + '%' : '—';
+    retEl.className   = 'metric-value' + (ret !== null ? (ret >= 0 ? ' pos' : ' neg') : '');
+  }
+
+  /* KEYBOARD: Enter to add */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.id && e.target.id.startsWith('inp-')) addHolding();
+  });
+
+  /* INIT */
+  initBanner();
+  renderTable();
+  renderMetrics();
+  if (API_KEY && holdings.length > 0) refreshAll();
+  const exchSelect = document.getElementById("inp-exch");
+
+exchSelect.addEventListener("change", function () {
+  if (this.value) {
+    this.classList.remove("placeholder");
+    this.classList.add("selected");
+  }
+});
+</script>
+</body>
+</html>
