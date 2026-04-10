@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <!-- Netlify Identity Widget -->
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -34,44 +36,48 @@
       min-height: 100vh;
     }
 
+    /* AUTH OVERLAY */
+    .auth-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 1.5rem;
+    }
+    .auth-overlay.hidden { display: none; }
+    .auth-title {
+      font-family: var(--serif); font-size: 1.6rem; font-weight: 600;
+    }
+    .auth-title em { font-style: italic; font-weight: 400; color: var(--text2); }
+    .auth-sub {
+      font-family: var(--mono); font-size: 12px; color: var(--text3);
+      max-width: 340px; text-align: center; line-height: 1.7;
+    }
+    .auth-btn {
+      padding: 10px 28px; background: var(--text); color: var(--surface);
+      border: none; border-radius: 7px; font-family: var(--mono);
+      font-size: 13px; cursor: pointer; transition: opacity 0.15s;
+    }
+    .auth-btn:hover { opacity: 0.8; }
+
     /* HEADER */
     header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       padding: 1rem 2.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
     }
     #inp-exch {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 8px 11px;
-      font-size: 13px;
-      font-family: var(--mono);
-      height: 36px;
-
-      appearance: none;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 7px; padding: 8px 11px; font-size: 13px;
+      font-family: var(--mono); height: 36px; appearance: none;
     }
+    #inp-exch.placeholder { color: var(--text3); }
+    #inp-exch.selected { color: var(--text); }
 
-    /* 👇 placeholder style */
-    #inp-exch.placeholder {
-      color: var(--text3);
-    }
-
-    /* 👇 selected value style */
-    #inp-exch.selected {
-      color: var(--text);
-    }
     .logo {
-      font-family: var(--serif);
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--text);
+      font-family: var(--serif); font-size: 1.05rem;
+      font-weight: 600; color: var(--text);
     }
     .logo em { font-style: italic; font-weight: 400; color: var(--text2); }
 
@@ -81,12 +87,23 @@
       display: flex; align-items: center; gap: 7px;
       font-family: var(--mono); font-size: 11px; color: var(--text3);
     }
-
     .dot {
       width: 6px; height: 6px; border-radius: 50%;
       background: var(--border2); flex-shrink: 0; transition: background 0.3s;
     }
     .dot.live { background: var(--green); }
+
+    .user-pill {
+      font-family: var(--mono); font-size: 11px; color: var(--text2);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .logout-btn {
+      background: none; border: 1px solid var(--border);
+      color: var(--text3); padding: 4px 10px; border-radius: 5px;
+      font-family: var(--mono); font-size: 10px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .logout-btn:hover { border-color: var(--text); color: var(--text); }
 
     .refresh-btn {
       display: flex; align-items: center; gap: 6px;
@@ -101,31 +118,6 @@
 
     /* MAIN */
     main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem; }
-
-    /* API BANNER */
-    .api-banner {
-      background: #fffbf0; border: 1px solid #e0cc80;
-      border-radius: 10px; padding: 1.1rem 1.25rem;
-      margin-bottom: 2rem; display: flex; gap: 12px; align-items: flex-start;
-    }
-    .api-banner.hidden { display: none; }
-    .api-banner-body { flex: 1; }
-    .api-banner p { font-family: var(--mono); font-size: 12px; color: #5a4a10; line-height: 1.7; }
-    .api-banner a { color: #7a4f10; }
-    .api-banner strong { color: #3a2f00; }
-    .api-input-row { display: flex; gap: 8px; margin-top: 10px; }
-    .api-input-row input {
-      flex: 1; font-family: var(--mono); font-size: 12px;
-      padding: 6px 10px; border: 1px solid #d4c070; border-radius: 5px;
-      background: #fffef5; color: var(--text);
-    }
-    .api-input-row input:focus { outline: none; border-color: #a08030; }
-    .api-save-btn {
-      padding: 6px 14px; background: var(--text); color: var(--surface);
-      border: none; border-radius: 5px; font-family: var(--mono);
-      font-size: 11px; cursor: pointer; white-space: nowrap;
-    }
-    .api-save-btn:hover { opacity: 0.8; }
 
     /* METRICS */
     .metrics {
@@ -168,7 +160,7 @@
       font-family: var(--mono); color: var(--text); height: 36px;
       transition: border-color 0.15s; width: 100%;
     }
-    .field input::placeholder { color: var(--text3); } */
+    .field input::placeholder { color: var(--text3); }
     .field input:focus { outline: none; border-color: var(--border2); background: var(--surface); }
 
     .add-btn {
@@ -275,9 +267,20 @@
 </head>
 <body>
 
+<!-- AUTH OVERLAY (shown when not logged in) -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-title">Portfolio <em>tracker</em></div>
+  <p class="auth-sub">Sign in to access your portfolio from anywhere. Your holdings are stored securely in the cloud.</p>
+  <button class="auth-btn" onclick="netlifyIdentity.open()">Sign in / Sign up</button>
+</div>
+
 <header>
   <div class="logo">Portfolio <em>tracker</em></div>
   <div class="header-right">
+    <div class="user-pill">
+      <span id="user-email"></span>
+      <button class="logout-btn" onclick="netlifyIdentity.logout()">Log out</button>
+    </div>
     <div class="status-pill">
       <div class="dot" id="dot"></div>
       <span id="status-text">—</span>
@@ -384,35 +387,96 @@
 </main>
 
 <footer>
-  <p>Prices via Yahoo Finance</p>
-  <p>All data stored locally in your browser — nothing is sent anywhere</p>
+  <p>Prices via Yahoo Finance (15-20 min delayed)</p>
+  <p>Holdings stored in MongoDB — accessible from any device</p>
 </footer>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  /* STATE */
-  let holdings = JSON.parse(localStorage.getItem('pf_td_v1') || '[]');
-  let API_KEY   = localStorage.getItem('td_api_key') || '';
+  /* ─── STATE ─── */
+  let holdings = [];
+  let currentUser = null;
 
-  function save() { localStorage.setItem('pf_td_v1', JSON.stringify(holdings)); }
+  function getToken() {
+    const user = netlifyIdentity.currentUser();
+    return user ? user.token.access_token : null;
+  }
 
-  /* API KEY */
-  function saveApiKey() {
-    const k = document.getElementById('api-key-input').value.trim();
-    if (!k) { showToast('Please paste your API key'); return; }
-    API_KEY = k;
-    localStorage.setItem('td_api_key', k);
-    document.getElementById('api-banner').classList.add('hidden');
-    showToast('API key saved ✓');
+  async function authFetch(url, opts = {}) {
+    const token = getToken();
+    if (!token) { showToast('Please log in'); return null; }
+    opts.headers = { ...opts.headers, 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+    const res = await fetch(url, opts);
+    return res.json();
+  }
+
+  /* ─── DB SYNC ─── */
+  async function loadHoldings() {
+    try {
+      const data = await authFetch('/.netlify/functions/holdings');
+      if (data && Array.isArray(data)) {
+        holdings = data;
+      }
+    } catch (e) {
+      console.error('Failed to load holdings:', e);
+      showToast('Failed to load holdings');
+    }
+    renderTable();
+    renderMetrics();
     if (holdings.length > 0) refreshAll();
   }
 
-  function initBanner() {
-    if (API_KEY) document.getElementById('api-banner').classList.add('hidden');
+  async function saveHoldingToDB(holding) {
+    try {
+      const saved = await authFetch('/.netlify/functions/holdings', {
+        method: 'POST',
+        body: JSON.stringify(holding)
+      });
+      return saved;
+    } catch (e) {
+      console.error('Failed to save:', e);
+      showToast('Failed to save holding');
+      return null;
+    }
   }
 
-  /* TOAST */
+  async function deleteHoldingFromDB(id) {
+    try {
+      await authFetch('/.netlify/functions/holdings?id=' + id, { method: 'DELETE' });
+    } catch (e) {
+      console.error('Failed to delete:', e);
+      showToast('Failed to delete holding');
+    }
+  }
+
+  /* ─── AUTH ─── */
+  netlifyIdentity.on('login', user => {
+    currentUser = user;
+    document.getElementById('auth-overlay').classList.add('hidden');
+    document.getElementById('user-email').textContent = user.email;
+    loadHoldings();
+  });
+
+  netlifyIdentity.on('logout', () => {
+    currentUser = null;
+    holdings = [];
+    document.getElementById('auth-overlay').classList.remove('hidden');
+    renderTable();
+    renderMetrics();
+  });
+
+  // Check if already logged in
+  const user = netlifyIdentity.currentUser();
+  if (user) {
+    currentUser = user;
+    document.getElementById('auth-overlay').classList.add('hidden');
+    document.getElementById('user-email').textContent = user.email;
+    // Refresh token then load
+    user.jwt().then(() => loadHoldings());
+  }
+
+  /* ─── TOAST ─── */
   function showToast(msg, ms = 2600) {
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -420,7 +484,7 @@
     setTimeout(() => t.classList.remove('show'), ms);
   }
 
-  /* FORMAT */
+  /* ─── FORMAT ─── */
   function money(n, cur) {
     if (n === null || n === undefined || isNaN(n)) return '—';
     const s = cur === 'USD' ? '$' : '₹';
@@ -435,8 +499,8 @@
     return '₹' + Math.abs(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
   }
 
-  /* ADD HOLDING */
-  function addHolding() {
+  /* ─── ADD HOLDING ─── */
+  async function addHolding() {
     const sym   = document.getElementById('inp-sym').value.trim().toUpperCase();
     const exch  = document.getElementById('inp-exch').value.trim().toUpperCase();
     const qty   = parseFloat(document.getElementById('inp-qty').value);
@@ -448,77 +512,76 @@
     if (isNaN(price) || price <= 0){ showToast('Enter a valid buy price'); return; }
 
     let finalexch = exch;
-
     if (exch === "NSE") finalexch = "NS";
     else if (exch === "BSE") finalexch = "BO";
 
-    holdings.push({
-      id: Date.now(),
-      sym: sym,
-      exch: finalexch,
-      qty,
-      buyPrice: price,
-      acct,
-      currentPrice: null,
-      prevClose: null,
-      currency: null,
-      lastUpdated: null,
-      fetchError: false
-    });
+    const holding = {
+      sym, exch: finalexch, qty, buyPrice: price, acct,
+      currentPrice: null, prevClose: null, currency: null,
+      lastUpdated: null, fetchError: false
+    };
 
-    save();
-    ['inp-sym','inp-exch','inp-qty','inp-price','inp-acct'].forEach(id => {
+    const saved = await saveHoldingToDB(holding);
+    if (!saved) return;
+
+    holding._id = saved._id;
+    holdings.push(holding);
+
+    ['inp-sym','inp-qty','inp-price','inp-acct'].forEach(id => {
       document.getElementById(id).value = '';
     });
+    const exchEl = document.getElementById('inp-exch');
+    exchEl.selectedIndex = 0;
+    exchEl.classList.remove('selected');
+    exchEl.classList.add('placeholder');
+
     renderTable(); renderMetrics();
     fetchPrice(holdings.length - 1);
   }
 
-  /* DELETE */
-  function removeHolding(id) {
-    holdings = holdings.filter(h => h.id !== id);
-    save(); renderTable(); renderMetrics();
+  /* ─── DELETE ─── */
+  async function removeHolding(id) {
+    await deleteHoldingFromDB(id);
+    holdings = holdings.filter(h => h._id !== id);
+    renderTable(); renderMetrics();
   }
 
+  /* ─── FETCH PRICE ─── */
   async function fetchPrice(i) {
-  const h = holdings[i];
-  if (!h) return;
+    const h = holdings[i];
+    if (!h) return;
 
-  try {
-    const res = await fetch(`/.netlify/functions/price?symbol=${h.sym}.${h.exch}`);
-    const raw = await res.json();
-    const data = raw.body ? JSON.parse(raw.body) : raw;
-    const meta = data?.chart?.result?.[0]?.meta;
+    try {
+      const ticker = h.exch ? `${h.sym}.${h.exch}` : h.sym;
+      const res = await fetch(`/.netlify/functions/price?symbol=${ticker}`);
+      const raw = await res.json();
+      const data = raw.body ? JSON.parse(raw.body) : raw;
+      const meta = data?.chart?.result?.[0]?.meta;
 
-    if (meta && meta.regularMarketPrice) {
-      h.currentPrice = meta.regularMarketPrice;
-      h.prevClose = meta.previousClose || null;
-      h.currency = meta.currency === 'USD' ? 'USD' : 'INR';
-      h.lastUpdated = new Date().toLocaleTimeString('en-IN', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-      h.fetchError = false;
-    } else {
+      if (meta && meta.regularMarketPrice) {
+        h.currentPrice = meta.regularMarketPrice;
+        h.prevClose = meta.previousClose || null;
+        h.currency = meta.currency === 'USD' ? 'USD' : 'INR';
+        h.lastUpdated = new Date().toLocaleTimeString('en-IN', {
+          hour: '2-digit', minute: '2-digit'
+        });
+        h.fetchError = false;
+      } else {
+        h.fetchError = true;
+      }
+
+      renderTable();
+      renderMetrics();
+    } catch (err) {
+      console.error("Backend fetch failed:", err);
       h.fetchError = true;
+      renderTable();
     }
-
-    save();
-    renderTable();
-    renderMetrics();
-
-  } catch (err) {
-    console.error("Backend fetch failed:", err);
-    h.fetchError = true;
-    save();
-    renderTable();
   }
-}
 
-  /* REFRESH ALL */
+  /* ─── REFRESH ALL ─── */
   async function refreshAll() {
-    if (!API_KEY)             { showToast('Please save your API key first'); return; }
-    if (holdings.length === 0){ showToast('No holdings to refresh'); return; }
+    if (holdings.length === 0) { showToast('No holdings to refresh'); return; }
 
     const btn = document.getElementById('refresh-btn');
     btn.classList.add('spinning');
@@ -526,7 +589,6 @@
 
     for (let i = 0; i < holdings.length; i++) {
       await fetchPrice(i);
-      // Space requests ~400ms apart to stay within 8 req/min free tier
       if (i < holdings.length - 1) await sleep(420);
     }
 
@@ -544,7 +606,7 @@
     document.getElementById('dot').className = 'dot' + (live ? ' live' : '');
   }
 
-  /* RENDER TABLE */
+  /* ─── RENDER TABLE ─── */
   function renderTable() {
     const body = document.getElementById('holdings-body');
     if (holdings.length === 0) {
@@ -596,12 +658,12 @@
         <td>${pnlCell}</td>
         <td>${retCell}</td>
         <td>${dayCell}</td>
-        <td><button class="del-btn" onclick="removeHolding(${h.id})">✕</button></td>
+        <td><button class="del-btn" onclick="removeHolding('${h._id}')">✕</button></td>
       </tr>`;
     }).join('');
   }
 
-  /* RENDER METRICS */
+  /* ─── RENDER METRICS ─── */
   function renderMetrics() {
     let totalInv = 0, totalCur = 0, hasAny = false;
     holdings.forEach(h => {
@@ -631,18 +693,16 @@
   });
 
   /* INIT */
-  initBanner();
   renderTable();
   renderMetrics();
-  if (API_KEY && holdings.length > 0) refreshAll();
-  const exchSelect = document.getElementById("inp-exch");
 
-exchSelect.addEventListener("change", function () {
-  if (this.value) {
-    this.classList.remove("placeholder");
-    this.classList.add("selected");
-  }
-});
+  const exchSelect = document.getElementById("inp-exch");
+  exchSelect.addEventListener("change", function () {
+    if (this.value) {
+      this.classList.remove("placeholder");
+      this.classList.add("selected");
+    }
+  });
 </script>
 </body>
 </html>
