@@ -271,7 +271,7 @@
 <div class="auth-overlay" id="auth-overlay">
   <div class="auth-title">Portfolio <em>tracker</em></div>
   <p class="auth-sub">Sign in to access your portfolio from anywhere. Your holdings are stored securely in the cloud.</p>
-  <button class="auth-btn" onclick="netlifyIdentity.open()">Sign in / Sign up</button>
+  <button class="auth-btn" onclick="document.getElementById('auth-overlay').style.display='none'; netlifyIdentity.open('signup');">Sign in / Sign up</button>
 </div>
 
 <header>
@@ -465,6 +465,12 @@
     renderTable();
     renderMetrics();
   });
+
+  netlifyIdentity.on('close', () => {
+  if (!netlifyIdentity.currentUser()) {
+    document.getElementById('auth-overlay').style.display = '';
+  }
+});
 
   // Check if already logged in
   const user = netlifyIdentity.currentUser();
